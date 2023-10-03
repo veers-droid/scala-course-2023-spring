@@ -10,7 +10,7 @@ import karazin.scala.users.group.week1.homework.services.getShares
 
 object program {
 
-    fun getPostsViews(): ErrorOr<List<ErrorOr<PostView>>> =
+    fun getPostsViews(): ErrorOr<List<PostView>> =
              getUserProfile().flatMap { profile ->
                 getPosts(profile.userId).flatMap { posts ->
                     ErrorOr.apply(posts.map { post -> getPostView(post) })
@@ -18,9 +18,9 @@ object program {
             }
 
 
-    fun getPostView(post: model.Post): ErrorOr<PostView> =
-        getComments(post.postId).flatMap { comments ->
-            getLikes(post.postId).flatMap { likes ->
+    fun getPostView(post: model.Post): PostView =
+        getComments(post.postId).map { comments ->
+            getLikes(post.postId).map { likes ->
                 getShares(post.postId).map { shares ->
                     PostView(
                         post,

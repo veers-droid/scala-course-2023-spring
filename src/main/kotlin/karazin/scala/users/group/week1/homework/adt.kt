@@ -14,9 +14,9 @@ object adt {
 
         }
 
-        fun <Q> map(f: (V) -> Q): ErrorOr<Q> = when (this) {
-            is Some -> Some(f(this.value))
-            is None -> this
+        fun <Q> map(f: (V) -> Q): Q = when (this) {
+            is Some -> f(this.value)
+            is None -> throw NoSuchElementException("map() called on None")
         }
 
         companion object {
