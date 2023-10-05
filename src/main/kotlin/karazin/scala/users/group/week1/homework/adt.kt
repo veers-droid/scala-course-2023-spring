@@ -8,20 +8,31 @@ object adt {
 
         class None(val t: Throwable) : ErrorOr<Nothing>()
 
-        fun <Q> flatMap(f : (V) -> ErrorOr<Q>): ErrorOr<Q> = when (this) {
-            is Some -> f(this.value)
+        fun <Q> flatMap(f: (V) -> ErrorOr<Q>): ErrorOr<Q> = when (this) {
+            is Some -> {
+                try {
+                    f(this.value)
+                } catch (e: Exception) {
+                    None(e)
+                }
+            }
             is None -> this
-
         }
 
-        fun <Q> map(f: (V) -> Q): Q = when (this) {
-            is Some -> f(this.value)
-            is None -> throw NoSuchElementException("map() called on None")
+        fun <Q> map(f: (V) -> Q): ErrorOr<Q> = when (this) {
+            is Some -> {
+                try {
+                    Some(f(this.value))
+                } catch (e: Exception) {
+                    None(e)
+                }
+            }
+            is None -> this
         }
 
         companion object {
             fun <V> apply(v: V?): ErrorOr<V> =
-                if(v == null)  None(RuntimeException("Value is null"))
+                if (v == null) None(RuntimeException("Value is null"))
                 else Some(v)
         }
 
