@@ -13,14 +13,21 @@ object program {
     fun getPostsViews(): ErrorOr<List<PostView>> =
              getUserProfile().flatMap { profile ->
                 getPosts(profile.userId).flatMap { posts ->
-                    ErrorOr.apply(posts.map { post -> getPostView(post) })
+                    posts.map { post ->
+                        getPostView(post) }.fold(
+                            ErrorOr.apply(emptyList())
+                    ) { acc, item ->
+                        acc.flatMap { list ->
+                            item.map { list + it }
+                        }
+                    }
                 }
             }
 
 
-    fun getPostView(post: model.Post): PostView =
-        getComments(post.postId).map { comments ->
-            getLikes(post.postId).map { likes ->
+    fun getPostView(post: model.Post): ErrorOr<PostView> =
+        getComments(post.postId).flatMap { comments ->
+            getLikes(post.postId).flatMap { likes ->
                 getShares(post.postId).map { shares ->
                     PostView(
                         post,
@@ -31,5 +38,4 @@ object program {
                 }
             }
         }
-
 }
